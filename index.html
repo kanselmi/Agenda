@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Class Agenda Timer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      text-align: left;
+      padding: 20px;
+    }
+    #overall {
+      font-size: 3em;
+      margin: 10px 0;
+      color: #ffcc00;
+    }
+    #countdown {
+      font-size: 2em;
+      margin: 20px 0;
+      color: #00ff88;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      font-size: 1.5em;
+    }
+    li {
+      margin: 10px 0;
+      padding: 5px;
+      border-radius: 6px;
+    }
+    .active {
+      background: #00ff8844;
+      font-weight: bold;
+      color: #00ff88;
+    }
+    .upcoming {
+      color: #bbb;
+    }
+    .past {
+      color: #555;
+      text-decoration: line-through;
+    }
+    #assessments {
+      margin-top: 40px;
+      font-size: 1.2em;
+      text-align: left;
+      display: inline-block;
+    }
+    #assessments h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #assessments a {
+      color: #00aaff;
+      text-decoration: none;
+    }
+    #assessments a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>5th Period Biology Agenda</h1>
+  <div id="overall">Loading total time…</div>
+  <div id="countdown">Loading current task…</div>
+  <ul id="agenda"></ul>
+
+  <div id="assessments">
+    <h2>Upcoming Assessments</h2>
+    <p><strong>Next Content Check:</strong> Sept 12, 2025 – 
+      <a href="https://play.blooket.com/play?hwId=68c0e0f9e56fe336b52125f4" target="_blank">Practice Problems</a>
+    </p>
+    <p><strong>Next Test:</strong> Sept 17, 2025 – 
+      <a href="https://play.blooket.com/play?hwId=68c0e0c5b65db0dae040869f" target="_blank">Practice Problems</a>
+    </p>
+  </div>
+
+  <script>
+    // EDIT YOUR AGENDA HERE (12-hour time with AM/PM):
+    const agenda = [
+      { task: "Warm-up", start: "11:24 AM", end: "11:27 AM" },
+      { task: "Cracker Activity", start: "11:27 AM", end: "11:30 AM" },
+      { task: "Explanation with Enzyme Pieces", start: "11:30 AM", end: "11:40 AM" },
+      { task: "Get Supplies: Paddle + Marker + Binder", start: "11:40 AM", end: "11:42 AM" },          
+      { task: "Notes: Pages 29-30", start: "11:42 AM", end: "12:00 PM" },
+      { task: "Practice with Enzyme Mat", start: "12:00 PM", end: "12:05 PM" },
+      { task: "Close all tabs and open Schoology", start: "12:05 PM", end: "12:08 PM" },
+      { task: "Level Up", start: "12:08 PM", end: "12:18 PM" }
+    ];
+
+    function parseTime(t) {
+      const d = new Date();
+      const [time, ampm] = t.split(" ");
+      let [h, m] = time.split(":").map(Number);
+      if (ampm === "PM" && h !== 12) h += 12;
+      if (ampm === "AM" && h === 12) h = 0;
+      d.setHours(h, m, 0, 0);
+      return d;
+    }
+
+    const classStart = parseTime(agenda[0].start);
+    const classEnd = parseTime(agenda[agenda.length - 1].end);
+
+    function formatTimeLeft(ms) {
+      const mins = Math.floor(ms / 60000);
+      const secs = Math.floor((ms % 60000) / 1000);
+      return `${mins}:${secs.toString().padStart(2, "0")}`;
+    }
+
+    function updateAgenda() {
+      const now = new Date();
+      const list = document.getElementById("agenda");
+      list.innerHTML = "";
+
+      let activeItem = null;
+      agenda.forEach(item => {
+        const start = parseTime(item.start);
+        const end = parseTime(item.end);
+        let status = "";
+
+        if (now < start) status = "upcoming";
+        else if (now >= start && now <= end) {
+          status = "active";
+          activeItem = { ...item, end };
+        } else status = "past";
+
+        const li = document.createElement("li");
+        li.className = status;
+        li.textContent = `${item.start} – ${item.end} ${item.task}`;
+        list.appendChild(li);
+      });
+
+      // Per-task countdown
+      const countdown = document.getElementById("countdown");
+      if (activeItem) {
+        const diff = activeItem.end - now;
+        countdown.textContent = `${activeItem.task}: ${formatTimeLeft(diff)} left`;
+      } else {
+        countdown.textContent = "No active task";
+      }
+
+      // Overall countdown
+      const overall = document.getElementById("overall");
+      if (now < classEnd) {
+        const diff = classEnd - now;
+        overall.textContent = `Class Time Remaining: ${formatTimeLeft(diff)}`;
+      } else {
+        overall.textContent = "Class is over!";
+      }
+    }
+
+    setInterval(updateAgenda, 1000);
+    updateAgenda();
+  </script>
+</body>
+</html>
+
